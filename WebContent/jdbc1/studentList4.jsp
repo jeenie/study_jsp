@@ -1,15 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ page import="java.util.*, lecture1.jdbc2.*"%>
-<%@ taglib tagdir="/WEB-INF/tags" prefix="my"%>
+<%@ page import="java.util.List, lecture1.jdbc1.*"%>
 <%
-	int currentPage = 1;
-	int pageSize = 10;
-	String pg = request.getParameter("pg");
-	if (pg != null)
-		currentPage = Integer.parseInt(pg);
-	List<Student> list = StudentDAO.findAll(currentPage, pageSize);
-	int recordCount = StudentDAO.count();
+	String s = request.getParameter("departmentId");
+	int departmentId = (s == null) ? 0 : Integer.parseInt(s);
+	List<Student> list;
+	if (departmentId == 0)
+		list = StudentDAO3.findAll();
+	else
+		list = StudentDAO3.findByDepartmentId(departmentId);
 %>
 <!DOCTYPE html>
 <html>
@@ -23,26 +22,40 @@
 <script
 	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <style>
-body {
-	font-family: 굴림체;
-}
-
 thead th {
 	background-color: #eee;
 }
 
 table.table {
 	width: 700px;
+	margin-top: 10px;
 }
 </style>
 </head>
 <body>
 	<div class="container">
 		<h1>학생목록</h1>
+		<form class="form-inline">
+			<div class="form-group">
+				<label>학과</label> <select name="departmentId" class="form-control">
+					<option value="0" <%=departmentId == 0 ? "selected" : ""%>>전체</option>
+					<%
+						for (Department d : DepartmentDAO.findAll()) {
+					%>
+					<option value="<%=d.getId()%>"
+						<%=departmentId == d.getId() ? "selected" : ""%>>
+						<%=d.getDepartmentName()%>
+					</option>
+					<%
+						}
+					%>
+				</select>
+			</div>
+			<button type="submit" class="btn btn-primary">조회</button>
+		</form>
 		<table class="table table-bordered table-condensed">
 			<thead>
 				<tr>
-					<th>id</th>
 					<th>학번</th>
 					<th>이름</th>
 					<th>학과</th>
@@ -54,17 +67,14 @@ table.table {
 					for (Student student : list) {
 				%>
 				<tr>
-					<td><%=student.getId()%></td>
 					<td><%=student.getStudentNumber()%></td>
-					<td><%=student.getName()%></td>
-					<td><%=student.getDepartmentName()%></td>
-					<td><%=student.getYear()%></td>
+					<td><%= student.getName() %></td>
+					<td><%= student.getDepartmentName() %></td>
+					<td><%= student.getYear() %></td>
 				</tr>
 				<% } %>
 			</tbody>
 		</table>
-		<my:pagination pageSize="<%= pageSize %>"
-			recordCount="<%= recordCount %>" queryStringName="pg" />
 	</div>
 </body>
 </html>

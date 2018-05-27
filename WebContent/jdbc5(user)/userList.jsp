@@ -1,18 +1,24 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ page import="java.util.*, lecture1.jdbc2.*"%>
+<%@ page import="java.util.*, java.net.*, jdbc.user5.*, lecture1.ParseUtils"%>
 <%@ taglib tagdir="/WEB-INF/tags" prefix="my"%>
+
 <%
 	int currentPage = 1;
 	int pageSize = 10;
+	request.setCharacterEncoding("UTF-8");
 	String pg = request.getParameter("pg");
 	if (pg != null)
-		currentPage = Integer.parseInt(pg);
+		currentPage = ParseUtils.parseInt(pg, 1);
 	String srchText = request.getParameter("srchText");
 	if (srchText == null)
 		srchText = "";
-	List<Student> list = StudentDAO2.findByName(srchText, currentPage, pageSize);
-	int recordCount = StudentDAO2.count(srchText);
+	String srchTextEncoded = URLEncoder.encode(srchText, "UTF-8");
+	int recordCount = UserDAO.count(srchText);
+	int lastPage = (recordCount + pageSize - 1) / pageSize;
+	if (currentPage > lastPage)
+		currentPage = lastPage;
+	List<User> list = UserDAO.findByName(srchText, currentPage, pageSize);
 %>
 <!DOCTYPE html>
 <html>
@@ -34,14 +40,23 @@ thead th {
 	background-color: #eee;
 }
 
+tr:hover td {
+	background-color: #ffe;
+	cursor: pointer;
+}
+
 table.table {
-	width: 700px;
+	margin-top: 5px;
 }
 </style>
 </head>
 <body>
 	<div class="container">
-		<h1>학생목록</h1>
+		<h1>사용자 목록</h1>
+		<a id="createButton" class="btn btn-primary pull-right"
+			href="userCreate.jsp?pg=<%=currentPage%>&srchText=<%=srchTextEncoded%>">
+			<i class="glyphicon glyphicon-plus"></i> 사용자 등록
+		</a>
 		<form class="form-inline">
 			<div class="form-group">
 				<label>이름</label> <input type="text" class="form-control"
@@ -52,32 +67,42 @@ table.table {
 		<table class="table table-bordered table-condensed">
 			<thead>
 				<tr>
-					<th>id</th>
-					<th>학번</th>
+					<th>번호</th>
+					<th>아이디</th>
 					<th>이름</th>
+					<th>이메일</th>
 					<th>학과</th>
-					<th>학년</th>
+					<th>사용 여부</th>
+					<th>사용자 유형</th>
 				</tr>
 			</thead>
 			<tbody>
 				<%
-					for (Student student : list) {
+					for (User user : list) {
 				%>
-				<tr>
-					<td><%=student.getId()%></td>
-					<td><%=student.getStudentNumber()%></td>
-					<td><%=student.getName()%></td>
-					<td><%=student.getDepartmentName()%></td>
-					<td><%=student.getYear()%></td>
+				<tr
+					data-url="userEdit.jsp?id=<%=user.getId()%>&pg=<%=currentPage%>&srchText=<%=srchTextEncoded%>">
+					<td><%=user.getId()%></td>
+					<td><%=user.getUserid()%></td>
+					<td><%=user.getName()%></td>
+					<td><%=user.getEmail()%></td>
+					<td><%=user.getDepartmentName()%></td>
+					<td><%=user.isEnabled()%></td>
+					<td><%=user.getUserType()%></td>
 				</tr>
 				<%
 					}
 				%>
 			</tbody>
 		</table>
-		
 		<my:pagination pageSize="<%=pageSize%>"
 			recordCount="<%=recordCount%>" queryStringName="pg" />
 	</div>
+	<script>
+		$("[data-url]").click(function() {
+			var url = $(this).attr("data-url");
+			location.href = url;
+		})
+	</script>
 </body>
 </html>

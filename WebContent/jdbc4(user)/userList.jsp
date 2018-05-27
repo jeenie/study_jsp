@@ -1,15 +1,18 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ page import="java.util.*, lecture1.jdbc3.*"%>
+<%@ page import="java.util.*, jdbc.user4.*, lecture1.ParseUtils"%>
 <%@ taglib tagdir="/WEB-INF/tags" prefix="my"%>
 <%
 	int currentPage = 1;
 	int pageSize = 10;
 	String pg = request.getParameter("pg");
 	if (pg != null)
-		currentPage = Integer.parseInt(pg);
-	List<Student> list = StudentDAO.findAll(currentPage, pageSize);
-	int recordCount = StudentDAO.count();
+		currentPage = ParseUtils.parseInt(pg, 1);
+	int recordCount = UserDAO.count();
+	int lastPage = Math.max(1, (recordCount + pageSize - 1) / pageSize);
+	if (currentPage > lastPage)
+		currentPage = lastPage;
+	List<User> list = UserDAO.findAll(currentPage, pageSize);
 %>
 <!DOCTYPE html>
 <html>
@@ -39,31 +42,45 @@ tr:hover td {
 	background-color: #ffe;
 	cursor: pointer;
 }
+
+#createButton {
+	margin-left: 590px;
+	margin-bottom: 4px;
+}
 </style>
 </head>
 <body>
 	<div class="container">
-		<h1>학생목록</h1>
+		<h1>사용자 목록</h1>
+		<a id="createButton" class="btn btn-primary" href="userCreate.jsp">
+			<i class="glyphicon glyphicon-plus"></i> 사용자 등록
+		</a>
 		<table class="table table-bordered table-condensed">
 			<thead>
+			
 				<tr>
-					<th>id</th>
-					<th>학번</th>
+					<th>번호</th>
+					<th>아이디</th>
 					<th>이름</th>
+					<th>이메일</th>
 					<th>학과</th>
-					<th>학년</th>
+					<th>사용 여부</th>
+					<th>유형</th>
 				</tr>
 			</thead>
 			<tbody>
 				<%
-					for (Student student : list) {
+					for (User user : list) {
 				%>
-				<tr data-url="studentEdit1.jsp?id=<%=student.getId()%>">
-					<td><%=student.getId()%></td>
-					<td><%=student.getStudentNumber()%></td>
-					<td><%=student.getName()%></td>
-					<td><%=student.getDepartmentName()%></td>
-					<td><%=student.getYear()%></td>
+				<tr
+					data-url="userEdit.jsp?id=<%=user.getId()%>&pg=<%=currentPage%>">
+					<td><%=user.getId()%></td>
+					<td><%=user.getUserid()%></td>
+					<td><%=user.getName()%></td>
+					<td><%=user.getEmail()%></td>
+					<td><%=user.getDepartmentName()%></td>
+					<td><%=user.isEnabled()%></td>
+					<td><%=user.getUserType()%></td>
 				</tr>
 				<%
 					}

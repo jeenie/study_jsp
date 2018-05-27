@@ -1,15 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ page import="java.util.*, lecture1.jdbc2.*"%>
-<%@ taglib tagdir="/WEB-INF/tags" prefix="my"%>
+<%@ page import="java.util.List, lecture1.jdbc2.*"%>
 <%
 	int currentPage = 1;
 	int pageSize = 10;
-	String pg = request.getParameter("pg");
-	if (pg != null)
-		currentPage = Integer.parseInt(pg);
 	List<Student> list = StudentDAO.findAll(currentPage, pageSize);
-	int recordCount = StudentDAO.count();
 %>
 <!DOCTYPE html>
 <html>
@@ -57,14 +52,12 @@ table.table {
 					<td><%=student.getId()%></td>
 					<td><%=student.getStudentNumber()%></td>
 					<td><%=student.getName()%></td>
-					<td><%=student.getDepartmentName()%></td>
-					<td><%=student.getYear()%></td>
+					<td><%= student.getDepartmentName() %></td>
+					<td><%= student.getYear() %></td>
 				</tr>
 				<% } %>
 			</tbody>
 		</table>
-		<my:pagination pageSize="<%= pageSize %>"
-			recordCount="<%= recordCount %>" queryStringName="pg" />
 	</div>
 </body>
 </html>

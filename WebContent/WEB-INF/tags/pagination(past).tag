@@ -26,11 +26,11 @@
 		++pageCount;
 	String queryString = request.getQueryString();
 	if (queryString == null)
-		queryString = name + "=@@@";
+		queryString = name + "=%d";
 	else if (queryString.matches(".*" + name + "=[0-9]+.*"))
-		queryString = queryString.replaceAll(name + "=[0-9]+", name + "=@@@");
+		queryString = queryString.replaceAll(name + "=[0-9]+", name + "=%d");
 	else
-		queryString = queryString + "&" + name + "=@@@";
+		queryString = queryString + "&" + name + "=%d";
 	String url = request.getRequestURI() + "?" + queryString;
 	if (currentPage > pageCount)
 		currentPage = pageCount;
@@ -53,7 +53,6 @@
 		for (Page p : pages) {
 	%>
 	<li class='<%=p.page == currentPage ? "active" : ""%>'><a
-		href='<%=url.replace("@@@", String.valueOf(p.page))%>'><%=p.label%></a>
-	</li>
+		href='<%=String.format(url, p.page)%>'><%=p.label%></a></li>
 	<% } %>
 </ul>

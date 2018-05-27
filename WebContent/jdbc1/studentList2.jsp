@@ -1,15 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ page import="java.util.*, lecture1.jdbc2.*"%>
+<%@ page import="java.util.List, lecture1.jdbc1.*"%>
 <%
-	int currentPage = 1; //초기값 default
-	int pageSize = 10;
-	String pg = request.getParameter("pg");
-	if (pg != null)
-		currentPage = Integer.parseInt(pg);
-	List<Student> list = StudentDAO.findAll(currentPage, pageSize);
-	int recordCount = StudentDAO.count();
-	int pageCount = (int) Math.ceil((double) recordCount / pageSize);
+	String srchText = request.getParameter("srchText");
+	if (srchText == null)
+		srchText = "";
+	List<Student> list = StudentDAO2.findByName(srchText);
 %>
 <!DOCTYPE html>
 <html>
@@ -23,26 +19,29 @@
 <script
 	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <style>
-body {
-	font-family: 굴림체;
-}
-
 thead th {
 	background-color: #eee;
 }
 
 table.table {
 	width: 700px;
+	margin-top: 10px;
 }
 </style>
 </head>
 <body>
 	<div class="container">
 		<h1>학생목록</h1>
+		<form class="form-inline">
+			<div class="form-group">
+				<label>이름</label> <input type="text" class="form-control"
+					name="srchText" value="<%=srchText%>" placeholder="검색조건" />
+			</div>
+			<button type="submit" class="btn btn-primary">조회</button>
+		</form>
 		<table class="table table-bordered table-condensed">
 			<thead>
 				<tr>
-					<th>id</th>
 					<th>학번</th>
 					<th>이름</th>
 					<th>학과</th>
@@ -54,27 +53,14 @@ table.table {
 					for (Student student : list) {
 				%>
 				<tr>
-					<td><%=student.getId()%></td>
 					<td><%=student.getStudentNumber()%></td>
 					<td><%=student.getName()%></td>
-					<td><%=student.getDepartmentName()%></td>
-					<td><%=student.getYear()%></td>
+					<td><%= student.getDepartmentName() %></td>
+					<td><%= student.getYear() %></td>
 				</tr>
-				<%
-					}
-				%>
+				<% } %>
 			</tbody>
 		</table>
-		<%
-			if (currentPage > 1) {
-		%>
-		<a class="btn btn-default"
-			href="studentList2.jsp?pg=<%=currentPage - 1%>"> &lt; </a>
-		<% } %>
-		<% if (currentPage < pageCount) { %>
-		<a class="btn btn-default"
-			href="studentList2.jsp?pg=<%= currentPage+1 %>"> &gt; </a>
-		<% } %>
 	</div>
 </body>
 </html>

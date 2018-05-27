@@ -1,15 +1,18 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ page import="java.util.*, lecture1.jdbc2.*"%>
+<%@ page import="java.util.*, lecture1.jdbc4.*, lecture1.*"%>
 <%@ taglib tagdir="/WEB-INF/tags" prefix="my"%>
 <%
 	int currentPage = 1;
 	int pageSize = 10;
 	String pg = request.getParameter("pg");
 	if (pg != null)
-		currentPage = Integer.parseInt(pg);
-	List<Student> list = StudentDAO.findAll(currentPage, pageSize);
+		currentPage = ParseUtils.parseInt(pg, 1);
 	int recordCount = StudentDAO.count();
+	int lastPage = (recordCount + pageSize - 1) / pageSize;
+	if (currentPage > lastPage)
+		currentPage = lastPage;
+	List<Student> list = StudentDAO.findAll(currentPage, pageSize);
 %>
 <!DOCTYPE html>
 <html>
@@ -34,11 +37,24 @@ thead th {
 table.table {
 	width: 700px;
 }
+
+tr:hover td {
+	background-color: #ffe;
+	cursor: pointer;
+}
+
+#createButton {
+	margin-left: 590px;
+	margin-bottom: 4px;
+}
 </style>
 </head>
 <body>
 	<div class="container">
 		<h1>학생목록</h1>
+		<a id="createButton" class="btn btn-primary" href="studentCreate1.jsp">
+			<i class="glyphicon glyphicon-plus"></i> 학생 등록
+		</a>
 		<table class="table table-bordered table-condensed">
 			<thead>
 				<tr>
@@ -53,18 +69,27 @@ table.table {
 				<%
 					for (Student student : list) {
 				%>
-				<tr>
+				<tr
+					data-url="studentEdit1.jsp?id=<%=student.getId()%>&pg=<%=currentPage%>">
 					<td><%=student.getId()%></td>
 					<td><%=student.getStudentNumber()%></td>
 					<td><%=student.getName()%></td>
 					<td><%=student.getDepartmentName()%></td>
 					<td><%=student.getYear()%></td>
 				</tr>
-				<% } %>
+				<%
+					}
+				%>
 			</tbody>
 		</table>
-		<my:pagination pageSize="<%= pageSize %>"
-			recordCount="<%= recordCount %>" queryStringName="pg" />
+		<my:pagination pageSize="<%=pageSize%>"
+			recordCount="<%=recordCount%>" queryStringName="pg" />
 	</div>
+	<script>
+		$("[data-url]").click(function() {
+			var url = $(this).attr("data-url");
+			location.href = url;
+		})
+	</script>
 </body>
 </html>

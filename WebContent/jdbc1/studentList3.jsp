@@ -1,18 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ page import="java.util.*, lecture1.jdbc2.*"%>
-<%@ taglib tagdir="/WEB-INF/tags" prefix="my"%>
+<%@ page import="java.util.List, lecture1.jdbc1.*"%>
 <%
-	int currentPage = 1;
-	int pageSize = 10;
-	String pg = request.getParameter("pg");
-	if (pg != null)
-		currentPage = Integer.parseInt(pg);
-	String srchText = request.getParameter("srchText");
-	if (srchText == null)
-		srchText = "";
-	List<Student> list = StudentDAO2.findByName(srchText, currentPage, pageSize);
-	int recordCount = StudentDAO2.count(srchText);
+	String s = request.getParameter("departmentId");
+	int departmentId = (s == null) ? 0 : Integer.parseInt(s);
+	List<Student> list;
+	if (departmentId == 0)
+		list = StudentDAO3.findAll();
+	else
+		list = StudentDAO3.findByDepartmentId(departmentId);
 %>
 <!DOCTYPE html>
 <html>
@@ -26,16 +22,13 @@
 <script
 	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <style>
-body {
-	font-family: 굴림체;
-}
-
 thead th {
 	background-color: #eee;
 }
 
 table.table {
 	width: 700px;
+	margin-top: 10px;
 }
 </style>
 </head>
@@ -44,15 +37,18 @@ table.table {
 		<h1>학생목록</h1>
 		<form class="form-inline">
 			<div class="form-group">
-				<label>이름</label> <input type="text" class="form-control"
-					name="srchText" value="<%=srchText%>" placeholder="검색조건" />
+				<label>학과</label> <select name="departmentId" class="form-control">
+					<option value="0" <%=departmentId == 0 ? "selected" : ""%>>전체</option>
+					<option value="1" <%=departmentId == 1 ? "selected" : ""%>>국어국문학</option>
+					<option value="2" <%=departmentId == 2 ? "selected" : ""%>>영어영문학</option>
+					<option value="3" <%=departmentId == 3 ? "selected" : ""%>>불어불문학</option>
+				</select>
 			</div>
 			<button type="submit" class="btn btn-primary">조회</button>
 		</form>
 		<table class="table table-bordered table-condensed">
 			<thead>
 				<tr>
-					<th>id</th>
 					<th>학번</th>
 					<th>이름</th>
 					<th>학과</th>
@@ -64,7 +60,6 @@ table.table {
 					for (Student student : list) {
 				%>
 				<tr>
-					<td><%=student.getId()%></td>
 					<td><%=student.getStudentNumber()%></td>
 					<td><%=student.getName()%></td>
 					<td><%=student.getDepartmentName()%></td>
@@ -75,9 +70,6 @@ table.table {
 				%>
 			</tbody>
 		</table>
-		
-		<my:pagination pageSize="<%=pageSize%>"
-			recordCount="<%=recordCount%>" queryStringName="pg" />
 	</div>
 </body>
 </html>
